@@ -12,36 +12,11 @@ export default class UploadForm extends Component {
         };
     }
 
-    handleFormSubmit = async (e) => {
-        e.preventDefault();
-        this.setState({
-            isProcessing: true
-        });
-        const postRequest = await axios.post('/api/file', this.state.file);
-        console.log('Response from the server:', postRequest);
-        this.setState({
-            isProcessing: false
-        });
-    };
-
-    handleFileSelected = (e) => {
-        const file = e.target.files[0];
-        console.log(file);
-        this.setState({
-            fileNameSelected: (file.name) ? file.name : ''
-        });
-        // Read the file info, set the data to component state, then on submit send it off
+    handleFileSelected = async (e) => {
         const reader = new FileReader();
-
-        reader.onload = (upload) => {
-            console.log('Upload:', upload);
-            this.setState({
-                file: {
-                    data_uri: upload.target.result,
-                    fileName: file.name,
-                    mimeType: file.type
-                }
-            });
+        const file = e.target.files[0];
+        reader.onload = (e) => {
+            console.log(e.target);
         };
 
         reader.readAsDataURL(file);
@@ -49,7 +24,6 @@ export default class UploadForm extends Component {
 
     render(){
         return(
-            <form onSubmit={this.handleFormSubmit}>
                 <div className="file-field input-field">
                     <div className="btn">
                         <span>File</span>
@@ -59,8 +33,6 @@ export default class UploadForm extends Component {
                         <input className="file-path validate" type="text" value={this.state.fileNameSelected} readOnly />
                     </div>
                 </div>
-                <button type='submit'>Upload</button>
-            </form>
         );
     }
 }

@@ -6,4 +6,8 @@ module.exports = (app) => {
     app.get('/api', (req, res) => {
         res.send({message: 'Hello world'});
     });
+
+    app.post('/api/file', (req, res) => {
+        res.send(req.body);
+    });
 };
