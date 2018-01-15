@@ -8,6 +8,7 @@ module.exports = (app) => {
     });
 
     app.post('/api/file', (req, res) => {
+        // console.log('POST request received', req);
         res.send(req.body);
     });
 };
