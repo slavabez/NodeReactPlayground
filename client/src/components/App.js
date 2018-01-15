@@ -1,14 +1,15 @@
 import React from 'react';
 
-import UploadForm from './UploadForm';
+// import UploadForm from './UploadForm';
+import BetterUploadForm from './BetterUploadForm';
 
 export default class App extends React.Component {
 
     render(){
         return (
             <div className='container'>
-                <h2>Upload form test</h2>
-                <UploadForm />
+                <h3 style={{textAlign: 'center'}}>Multi upload form</h3>
+                <BetterUploadForm isMultiFile />
             </div>
         );
     }

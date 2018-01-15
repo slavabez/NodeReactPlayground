@@ -39,8 +39,14 @@ export default class UploadForm extends Component {
 
     render() {
 
+        const progressStyles = {
+            width: '100%'
+        };
+
         const progress = (this.state.isUploading) ?
-            <progress value={this.state.currentProgress} max={this.state.maxProgress}/> :
+            <progress value={this.state.currentProgress} max={this.state.maxProgress} style={progressStyles}>
+                {`${this.state.currentProgress}/${this.state.maxProgress}`}
+            </progress> :
             <span>Choose a file to upload</span>;
 
         return (
