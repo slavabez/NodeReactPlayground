@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-// import PromiseFileReader from 'promise-file-reader';
+import ImageCompressor from 'image-compressor.js';
 import axios from 'axios';
 
 const inputFieldStyles = {
@@ -59,19 +59,6 @@ export default class BetterUploadForm extends Component {
 
     handleSubmit = async () => {
         // Prepare files for upload by converting from binary images to URLs
-        /*const results = await Promise.all(
-            this.state.filesSelected.map(
-                // noinspection BadExpressionStatementJS
-                async (file) => {
-                    return {
-                        data_uri: await PromiseFileReader.readAsDataURL(file),
-                        name: file.name,
-                        type: file.type,
-                        size: file.size
-                    };
-                }
-            )
-        );*/
         const formData = new FormData();
         // Add all files to the form
         this.state.filesSelected.forEach((file) => {
@@ -82,6 +69,10 @@ export default class BetterUploadForm extends Component {
         };
         const response = await axios.post('/api/file', formData, requestConfig);
         console.log(response);
+
+    };
+
+    handleConvert = async (e) => {
 
     };
 
@@ -153,6 +144,7 @@ export default class BetterUploadForm extends Component {
                     <input
                         style={inputFieldStyles}
                         type="file"
+                        accept="image/*"
                         multiple={this.props.isMultiFile}
                         onDragEnter={this.addHighlight}
                         onDragExit={this.removeHighlight}
@@ -165,7 +157,7 @@ export default class BetterUploadForm extends Component {
                 <ul className="collection">
                     {collectionItems}
                     <li className="collection-item active" style={listStyles}>
-                        Total: {formatBytes(totalSize)}
+                        Total: {this.state.filesSelected.length} file(s), {formatBytes(totalSize)}
                         <i
                             className="material-icons red-text"
                             style={{cursor: 'pointer'}}
@@ -175,7 +167,8 @@ export default class BetterUploadForm extends Component {
                         </i>
                     </li>
                 </ul>
-                <button type='click' onClick={this.handleSubmit}>Submit</button>
+                <a className="waves-effect waves-light btn" onClick={this.handleSubmit}>Submit</a>
+                <a className="waves-effect waves-light btn" type='click' onClick={this.handleConvert}>Convert</a>
             </div>
         );
     };
