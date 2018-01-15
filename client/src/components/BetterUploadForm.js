@@ -74,8 +74,8 @@ export default class BetterUploadForm extends Component {
         );*/
         const formData = new FormData();
         // Add all files to the form
-        this.state.filesSelected.forEach((file, index) => {
-            formData.append(`file-${index}`, file);
+        this.state.filesSelected.forEach((file) => {
+            formData.append(`files`, file);
         });
         const requestConfig = {
             headers: { 'content-type': 'multipart/form-data' }
