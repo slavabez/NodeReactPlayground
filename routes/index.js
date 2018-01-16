@@ -16,16 +16,16 @@ const upload = multer({
         fileSize: 10000000
     },
     fileFilter: (req, file, cb) => {
+        console.log(file);
         // Check for extension and mime type
         const fileTypes = /jpeg|jpg|png|gif/;
-        const extName = fileTypes.test(path.extname(file.originalname).toLowerCase());
         // Check the mime type
         const mimeType = fileTypes.test(file.mimetype);
 
-        if (extName && mimeType){
+        if (mimeType){
             return cb(null, true);
         } else {
-            return cb('Error: incorrect file type. Only images can be uploaded')
+            return cb(`File type ${mimeType} and/or extension ${extName} not allowed. Error: incorrect file type. Only images can be uploaded. `)
         }
     }
 });

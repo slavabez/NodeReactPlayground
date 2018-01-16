@@ -3,6 +3,10 @@ import PropTypes from 'prop-types';
 import ImageCompressor from 'image-compressor.js';
 import axios from 'axios';
 
+import { formatBytes } from '../helpers';
+import FileItem from './FileItem';
+import ProgressBar from './ProgressBar';
+
 const inputFieldStyles = {
     width: '100%',
     height: '10rem',
@@ -33,15 +37,12 @@ const listStyles = {
     display: 'flex',
     justifyContent: 'space-between'
 };
-
-function formatBytes(bytes, decimals) {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024,
-        dm = decimals || 2,
-        sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'],
-        i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
-}
+const blobToFile = (theBlob, fileName) => {
+    theBlob.lastModified = Date.now();
+    theBlob.name = fileName;
+    theBlob.originalname = fileName;
+    return theBlob;
+};
 
 export default class BetterUploadForm extends Component {
     constructor(props) {
@@ -69,12 +70,40 @@ export default class BetterUploadForm extends Component {
         };
         const response = await axios.post('/api/file', formData, requestConfig);
         console.log(response);
+    };
+
+    handleConvert = () => {
+        const compressor = new ImageCompressor();
+        console.log(compressor);
+        try {
+            const promises = this.state.filesSelected.map(
+                 (file) => {
+                    return compressor.compress(file, {
+                        maxWidth: 500,
+                        maxHeight: 500,
+                        quality: 0.9
+                    });
+                }
+            );
+            let newState;
+            Promise.all(promises)
+                .then((values) => {
+                    newState = values;
+                    newState = newState.map((blob) => {
+                        return blobToFile(blob, Date.now() + '.jpg');
+                    });
+                    console.log('New state: ', newState);
+                    this.setState({
+                        filesSelected: newState
+                    });
+                });
+
+        } catch (e) {
+            console.log('Error happened converting:',e);
+        }
 
     };
 
-    handleConvert = async (e) => {
-
-    };
 
     addFilesToList = (files) => {
         // Add new files in addition to the old ones
@@ -82,7 +111,6 @@ export default class BetterUploadForm extends Component {
             return {filesSelected: oldState.filesSelected.concat(Array.from(files))}
         });
     };
-
     removeAFile = (name, lastModified) => {
         this.setState(
             (oldState) => {
@@ -94,7 +122,6 @@ export default class BetterUploadForm extends Component {
             }
         );
     };
-
     removeAllFiles = () => {
         this.setState({
             filesSelected: []
@@ -104,7 +131,6 @@ export default class BetterUploadForm extends Component {
     addHighlight = () => {
         this.setState({isHighlighted: true});
     };
-
     removeHighlight = () => {
         this.setState({isHighlighted: false});
     };
@@ -113,20 +139,12 @@ export default class BetterUploadForm extends Component {
         const collectionItems = this.state.filesSelected.map(
             (file, index) => {
                 return (
-                    <li className="collection-item" key={`${index}-${Date.now()}`}>
-                        <div style={listStyles}>
-                            {file.name} - {formatBytes(file.size)}
-                            <i
-                                className="material-icons red-text"
-                                style={{cursor: 'pointer'}}
-                                onClick={() => {
-                                    this.removeAFile(file.name, file.lastModified)
-                                }}
-                            >
-                                delete
-                            </i>
-                        </div>
-                    </li>
+                    <FileItem
+                        key={`${index}-${Date.now()}`}
+                        file={file}
+                        removeAFile={this.removeAFile}
+                        listStyles={listStyles}
+                    />
                 );
             }
         );
@@ -139,7 +157,10 @@ export default class BetterUploadForm extends Component {
             : 0;
 
         return (
-            <div>
+            <div style={{
+                display: 'flex',
+                flexDirection: 'column'
+            }}>
                 <div style={{position: 'relative'}}>
                     <input
                         style={inputFieldStyles}
@@ -167,8 +188,20 @@ export default class BetterUploadForm extends Component {
                         </i>
                     </li>
                 </ul>
-                <a className="waves-effect waves-light btn" onClick={this.handleSubmit}>Submit</a>
-                <a className="waves-effect waves-light btn" type='click' onClick={this.handleConvert}>Convert</a>
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between'
+                }}>
+                    <a className="waves-effect waves-light btn left-align" onClick={this.handleSubmit}>Submit</a>
+                    <a className="waves-effect waves-light btn right-align" type='click' onClick={this.handleConvert}>
+                        Convert
+                        <i className="material-icons" style={{cursor: 'pointer'}} >
+                            photo_size_select_large
+                        </i>
+                    </a>
+                </div>
+
+                <ProgressBar progress={30}/>
             </div>
         );
     };
