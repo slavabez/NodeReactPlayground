@@ -23,7 +23,7 @@ const inputOverlayStyles = (isHighlight = false) => {
         zIndex: '0',
         outline: '2px dashed black',
         outlineOffset: '-10px',
-        backgroundColor: (!isHighlight) ? '#e6e6e6' : 'rgb(183, 237, 175)',
+        backgroundColor: (!isHighlight) ? '#E6E6E6' : '#B7EDAF',
         textAlign: 'center',
         margin: '0',
         display: 'flex',
