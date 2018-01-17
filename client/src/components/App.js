@@ -1,7 +1,7 @@
 import React from 'react';
 
 // import UploadForm from './UploadForm';
-import BetterUploadForm from './BetterUploadForm';
+import YetBetterUploadForm from './YetBetterUploadForm';
 
 export default class App extends React.Component {
 
@@ -9,7 +9,7 @@ export default class App extends React.Component {
         return (
             <div className='container'>
                 <h3 style={{textAlign: 'center'}}>Multi upload form</h3>
-                <BetterUploadForm />
+                <YetBetterUploadForm />
             </div>
         );
     }
