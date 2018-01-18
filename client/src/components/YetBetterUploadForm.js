@@ -11,12 +11,14 @@ import Button from './styled/Button';
 
 
 class YetBetterUploadForm extends Component {
-    constructor(props) {
+    constructor() {
         super();
 
         this.state = {
             fileIsDragged: false,
-            filesToUpload: []
+            filesToUpload: [],
+            originalMetadata: [],
+            convertedMetadata: []
         };
     }
 
@@ -26,8 +28,30 @@ class YetBetterUploadForm extends Component {
 
     handleFileSubmit = (e) => {
         const files = e.target.files;
-        this.setState((oldState) => {
-            return {filesToUpload: oldState.filesToUpload.concat(Array.from(files))}
+        this.addFileToList(files);
+    };
+
+    addFileToList = (files) => {
+        let allFiles = this.state.filesToUpload.concat(Array.from(files));
+        // Add a unique key for lookup to each file
+        allFiles = allFiles.map(file => {
+            if (!file.uniqueId) {
+                file.uniqueId = Math.random();
+            }
+            return file;
+        });
+        const metadata = allFiles.map(
+            (file) => {
+                return {
+                    name: file.name,
+                    size: file.size,
+                    uniqueId: file.uniqueId
+                };
+            });
+
+        this.setState({
+            filesToUpload: allFiles,
+            originalMetadata: metadata
         });
     };
 
@@ -70,16 +94,16 @@ class YetBetterUploadForm extends Component {
                     }}/>
                 <InputOverlay fileBeingDraggedOver={this.state.fileIsDragged}/>
 
-                <br/>
-
                 <Button className="waves-effect waves-light btn" onClick={() => {
                     this.convertFiles(this.state.filesToUpload)
                 }}>Convert
                 </Button>
 
-                <br/>
-
                 <Button className="waves-effect waves-light btn">Button</Button>
+                <Button
+                    className="waves-effect waves-light btn"
+                    onClick={() => { console.log(this.state)}}
+                >Show state</Button>
 
             </FormWrapper>
         );
