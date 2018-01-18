@@ -3,43 +3,85 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import Compressor from 'image-compressor.js';
 
-const Wrapper = styled.div`
-    display: flex;
-    flex-direction: column;
-    position: relative;
-`;
+// Importing styled components
+import FormWrapper from './styled/FormWrapper';
+import FileInput from './styled/FileInput';
+import InputOverlay from './styled/InputOverlay';
+import Button from './styled/Button';
 
-const FileInput = styled.input`
-    display: flex;
-    opacity: 0;
-    z-index: 10;
-    height: 10rem;
-`;
-
-const InputOverlay = styled.div`
-    display: flex;
-    position: absolute;
-    z-index: 1;
-    width: 100%;
-    height: 100%;
-    background-color: ${props => props.fileBeingDraggedOver ? '#c1fec1' : '#ecebea'};
-`;
 
 class YetBetterUploadForm extends Component {
-    constructor(props){
+    constructor(props) {
         super();
 
-        this.state = {};
+        this.state = {
+            fileIsDragged: false,
+            filesToUpload: []
+        };
     }
 
-    render(){
+    handleSetFileDragOver(isDragged = false) {
+        this.setState({fileIsDragged: isDragged})
+    };
+
+    handleFileSubmit = (e) => {
+        const files = e.target.files;
+        this.setState((oldState) => {
+            return {filesToUpload: oldState.filesToUpload.concat(Array.from(files))}
+        });
+    };
+
+    convertFiles(files) {
+        return new Promise((resolve, reject) => {
+            const comp = new Compressor();
+
+            const promises = files.map(
+                (file) => {
+                    return comp.compress(file, {
+                        maxWidth: 500,
+                        maxHeight: 500,
+                        quality: 0.9
+                    });
+                }
+            );
+            Promise.all(promises)
+                .then(converted => {
+                    resolve(converted);
+                    console.log(converted);
+                })
+                .catch((err => {
+                    reject(err);
+                }))
+        });
+    };
+
+    render() {
         return (
-            <Wrapper>
-                <FileInput type='file'/>
-                <InputOverlay fileBeingDraggedOver>
-                    Drag files here or click to select
-                </InputOverlay>
-            </Wrapper>
+            <FormWrapper className="container">
+                <FileInput
+                    type="file"
+                    multiple
+                    onChange={this.handleFileSubmit}
+                    onDragEnter={() => {
+                        this.handleSetFileDragOver(true)
+                    }}
+                    onDragExit={() => {
+                        this.handleSetFileDragOver(false)
+                    }}/>
+                <InputOverlay fileBeingDraggedOver={this.state.fileIsDragged}/>
+
+                <br/>
+
+                <Button className="waves-effect waves-light btn" onClick={() => {
+                    this.convertFiles(this.state.filesToUpload)
+                }}>Convert
+                </Button>
+
+                <br/>
+
+                <Button className="waves-effect waves-light btn">Button</Button>
+
+            </FormWrapper>
         );
     }
 }

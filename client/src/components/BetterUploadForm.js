@@ -45,8 +45,8 @@ const blobToFile = (theBlob, fileName) => {
 };
 
 export default class BetterUploadForm extends Component {
-    constructor(props) {
-        super(props);
+    constructor() {
+        super();
         this.state = {
             filesSelected: [],
             isHighlighted: false
