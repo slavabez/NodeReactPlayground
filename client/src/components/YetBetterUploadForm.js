@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import Compressor from 'image-compressor.js';
 
+import FileItem from './FileItem';
+
 // Importing styled components
 import FormWrapper from './styled/FormWrapper';
 import FileInput from './styled/FileInput';
@@ -22,15 +24,8 @@ class YetBetterUploadForm extends Component {
         };
     }
 
-    handleSetFileDragOver(isDragged = false) {
-        this.setState({fileIsDragged: isDragged})
-    };
-
-    handleFileSubmit = (e) => {
-        const files = e.target.files;
-        this.addFileToList(files);
-    };
-
+    handleSetFileDragOver(isDragged = false) { this.setState({fileIsDragged: isDragged}) };
+    handleFileSubmit = (e) => { this.addFileToList(e.target.files); };
     addFileToList = (files) => {
         let allFiles = this.state.filesToUpload.concat(Array.from(files));
         // Add a unique key for lookup to each file
@@ -55,6 +50,13 @@ class YetBetterUploadForm extends Component {
         });
     };
 
+    handleConvertClick = async (e) => {
+        const converted = await this.convertFiles(this.state.filesToUpload);
+        this.setState({
+            filesToUpload: converted
+        });
+    };
+
     convertFiles(files) {
         return new Promise((resolve, reject) => {
             const comp = new Compressor();
@@ -70,8 +72,14 @@ class YetBetterUploadForm extends Component {
             );
             Promise.all(promises)
                 .then(converted => {
-                    resolve(converted);
-                    console.log(converted);
+                    // Add the unique ID and metadata
+                    const convertedFiles = converted.map(
+                        (file, index) => {
+                            file.uniqueId = this.state.filesToUpload[index].uniqueId;
+                            return file;
+                        }
+                    );
+                    resolve(convertedFiles);
                 })
                 .catch((err => {
                     reject(err);
@@ -94,9 +102,11 @@ class YetBetterUploadForm extends Component {
                     }}/>
                 <InputOverlay fileBeingDraggedOver={this.state.fileIsDragged}/>
 
-                <Button className="waves-effect waves-light btn" onClick={() => {
-                    this.convertFiles(this.state.filesToUpload)
-                }}>Convert
+                <Button
+                    className="waves-effect waves-light btn"
+                    onClick={this.handleConvertClick}
+                >
+                    Convert
                 </Button>
 
                 <Button className="waves-effect waves-light btn">Button</Button>
@@ -104,6 +114,10 @@ class YetBetterUploadForm extends Component {
                     className="waves-effect waves-light btn"
                     onClick={() => { console.log(this.state)}}
                 >Show state</Button>
+
+                {this.state.filesToUpload.map(
+                    (file) => <FileItem file={file} key={file.uniqueId} />
+                )}
 
             </FormWrapper>
         );

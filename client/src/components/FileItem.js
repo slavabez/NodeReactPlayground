@@ -12,7 +12,7 @@ const FileItem = (props) => {
                     className="material-icons red-text"
                     style={{cursor: 'pointer'}}
                     onClick={() => {
-                        props.removeAFile(props.file.name, props.file.lastModified)
+                        props.removeAFile(props.file.uniqueId)
                     }}
                 >
                     delete
