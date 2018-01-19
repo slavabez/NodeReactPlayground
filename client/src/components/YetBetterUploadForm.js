@@ -1,11 +1,9 @@
 import React, {Component} from 'react';
-import PropTypes from 'prop-types';
-import styled from 'styled-components';
 import Compressor from 'image-compressor.js';
 
-import FileItem from './FileItem';
+import FileList from './styled/FileList';
 
-// Importing styled components
+// Styled components
 import FormWrapper from './styled/FormWrapper';
 import FileInput from './styled/FileInput';
 import InputOverlay from './styled/InputOverlay';
@@ -18,14 +16,21 @@ class YetBetterUploadForm extends Component {
 
         this.state = {
             fileIsDragged: false,
+            isConverting: false,
+            isUploading: false,
             filesToUpload: [],
             originalMetadata: [],
             convertedMetadata: []
         };
     }
 
-    handleSetFileDragOver(isDragged = false) { this.setState({fileIsDragged: isDragged}) };
-    handleFileSubmit = (e) => { this.addFileToList(e.target.files); };
+    handleSetFileDragOver(isDragged = false) {
+        this.setState({fileIsDragged: isDragged})
+    };
+
+    handleFileSubmit = (e) => {
+        this.addFileToList(e.target.files);
+    };
     addFileToList = (files) => {
         let allFiles = this.state.filesToUpload.concat(Array.from(files));
         // Add a unique key for lookup to each file
@@ -35,14 +40,16 @@ class YetBetterUploadForm extends Component {
             }
             return file;
         });
-        const metadata = allFiles.map(
-            (file) => {
-                return {
-                    name: file.name,
-                    size: file.size,
-                    uniqueId: file.uniqueId
-                };
-            });
+        const metadata = allFiles
+            .map(
+                (file) => {
+                    return {
+                        name: file.name,
+                        size: file.size,
+                        uniqueId: file.uniqueId
+                    };
+                }
+            );
 
         this.setState({
             filesToUpload: allFiles,
@@ -50,10 +57,24 @@ class YetBetterUploadForm extends Component {
         });
     };
 
-    handleConvertClick = async (e) => {
+    handleConvertClick = async () => {
+        this.setState({isConverting: true});
         const converted = await this.convertFiles(this.state.filesToUpload);
         this.setState({
-            filesToUpload: converted
+            filesToUpload: converted,
+            isConverting: false
+        });
+    };
+
+    handleDeleteFile = (uniqueId) => {
+        this.setState((oldState) => {
+            return {
+                filesToUpload: oldState.filesToUpload.filter(
+                    (file) => {
+                        return file.uniqueId !== uniqueId;
+                    }
+                )
+            };
         });
     };
 
@@ -109,15 +130,21 @@ class YetBetterUploadForm extends Component {
                     Convert
                 </Button>
 
-                <Button className="waves-effect waves-light btn">Button</Button>
                 <Button
                     className="waves-effect waves-light btn"
-                    onClick={() => { console.log(this.state)}}
-                >Show state</Button>
+                    onClick={() => {
+                        console.log(this.state)
+                    }}
+                >
+                    Show state
+                </Button>
 
-                {this.state.filesToUpload.map(
-                    (file) => <FileItem file={file} key={file.uniqueId} />
-                )}
+                <FileList
+                    isConverting={this.state.isConverting}
+                    isUploading={this.state.isUploading}
+                    files={this.state.filesToUpload}
+                    deleteFile={this.handleDeleteFile}
+                />
 
             </FormWrapper>
         );
